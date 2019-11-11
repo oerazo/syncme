@@ -41,13 +41,19 @@ echo -n " "
 
 find $1 -type file -print0 | while IFS= read -r -d '' file
 do
-    echo "$file"
+    #echo "$file"
     #Get file path
     path=$(dirname "${file}")
     #Get base
     base=$(basename "${file}")
     #Sync one file at the time to run some validations
-    aws s3 sync $path s3://sync-appsec/${path#/} --exclude='*' --include=$base
+    result=$(aws s3 sync $path s3://sync-appsec/${path#/} --exclude='*' --include=$base --output text)
+    if [ -z "$result" ]; then
+      echo "$file was found in filer and it is identical in s3"
+    else
+      echo $result
+    fi
+
 done
 
 success
