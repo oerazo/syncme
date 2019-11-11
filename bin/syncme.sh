@@ -28,7 +28,7 @@ success() {
 
 # dependency check
 echo -n "checking dependencies"
-deps=(aws)
+deps=(aws dd)
 missing=()
 for dep in "${deps[@]}"; do
     echo -n "."
@@ -52,9 +52,13 @@ do
     if [ -z "$result" ]; then
       #Get eTag for this object in s3
       eTag=$(aws s3api head-object --bucket $bucket --key ${path#/}/$base --query ETag --output text)
-      echo $eTag
-      #Calculate eTag on local file
-      
+      #echo $eTag
+      #Calculate eTag on local file - no multipart required
+      filerETag="$(dd bs=1m count=1 if=$file 2>/dev/null | md5)"
+      #echo $filerETag
+      if [ $eTag == $filerETag ]; then
+        echo "Checksum success"
+      fi
       echo "$file was found in filer and it is identical in s3"
     else
       echo $result
