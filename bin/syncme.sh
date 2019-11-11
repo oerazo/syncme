@@ -11,6 +11,7 @@ die() {
 trap 'exit 255' SIGINT
 #vars
 hlpmsg=""
+bucket="sync-appsec"
 RANDOM=$$$(date +%s)
 success() {
     e=("ヽ(°〇°)ﾉ" "(°ロ°) !" "(^０^)ノ" "(⌒ω⌒)ﾉ" "(∩ᄑ_ᄑ)⊃━☆ﾟ*･｡*･:≡( ε:)" "╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ" "( ͡° ͜ʖ ͡°)" "ଘ(੭ˊᵕˋ)੭* ੈ✩‧₊˚")
@@ -47,8 +48,13 @@ do
     #Get base
     base=$(basename "${file}")
     #Sync one file at the time to run some validations
-    result=$(aws s3 sync $path s3://sync-appsec/${path#/} --exclude='*' --include=$base --output text)
+    result=$(aws s3 sync $path s3://$bucket/${path#/} --exclude='*' --include=$base --output text)
     if [ -z "$result" ]; then
+      #Get eTag for this object in s3
+      eTag=$(aws s3api head-object --bucket $bucket --key ${path#/}/$base --query ETag --output text)
+      echo $eTag
+      #Calculate eTag on local file
+      
       echo "$file was found in filer and it is identical in s3"
     else
       echo $result
