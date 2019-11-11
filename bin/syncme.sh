@@ -44,10 +44,10 @@ do
     echo "$file"
     #Get file path
     path=$(dirname "${file}")
+    #Get base
     base=$(basename "${file}")
-    echo $path
-    echo $base
-    aws s3 sync $path s3://sync-appsec/$path --exclude='*' --include=$base
+    #Sync one file at the time to run some validations
+    aws s3 sync $path s3://sync-appsec/${path#/} --exclude='*' --include=$base
 done
 
 success
