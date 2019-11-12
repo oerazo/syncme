@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # base funcs
-usage() { echo "usage: $0 <filer location>"; exit 64; }
+usage() { echo "usage: $0 <filer location> <bucket>"; exit 64; }
 die() {
     printf '%s\n' "$*" >&2
     [[ "$hlpmsg" == "" ]] || printf '\nPROTIP - %s\n' "$hlpmsg"
@@ -11,7 +11,7 @@ die() {
 trap 'exit 255' SIGINT
 #vars
 hlpmsg=""
-bucket="sync-appsec"
+bucket=$2
 RANDOM=$$$(date +%s)
 success() {
     e=("ヽ(°〇°)ﾉ" "(°ロ°) !" "(^０^)ノ" "(⌒ω⌒)ﾉ" "(∩ᄑ_ᄑ)⊃━☆ﾟ*･｡*･:≡( ε:)" "╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ" "( ͡° ͜ʖ ͡°)" "ଘ(੭ˊᵕˋ)੭* ੈ✩‧₊˚")
@@ -24,10 +24,10 @@ success() {
 [[ "$AWS_DEFAULT_REGION" == "" ]] && AWS_DEFAULT_REGION="ap-southeast-2"
 
 # check args
-[[ "$#" -lt 1 ]] && usage
+[[ "$#" -lt 2 ]] && usage
 
 # dependency check
-echo -n "checking dependencies"
+echo -e "checking dependencies"
 deps=(aws dd)
 missing=()
 for dep in "${deps[@]}"; do
@@ -38,7 +38,7 @@ done
 hlpmsg="auth failed against AWS API, your credentials might have expired, if you are using a federeded identity endpoint try re-authing"
 aws sts get-caller-identity &>/dev/null || die " (fail) unable to connect to AWS"
 hlpmsg=""
-echo -n " "
+echo -e " "
 
 find $1 -type file -print0 | while IFS= read -r -d '' file
 do
