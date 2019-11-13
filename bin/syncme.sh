@@ -28,7 +28,7 @@ success() {
 
 # dependency check
 echo -e "checking dependencies"
-deps=(aws dd)
+deps=(aws dd openssl)
 missing=()
 for dep in "${deps[@]}"; do
     echo -n "."
@@ -40,9 +40,8 @@ aws sts get-caller-identity &>/dev/null || die " (fail) unable to connect to AWS
 hlpmsg=""
 echo -e " "
 
-find $1 -type file -print0 | while IFS= read -r -d '' file
+find $1 -type f -print0 | while IFS= read -r -d '' file
 do
-    #echo "$file"
     #Get file path
     path=$(dirname "${file}")
     #Get base
@@ -59,10 +58,10 @@ do
       #This tech debt has been brought to you by me using bash :)
       eTag=${eTag#\"}
       eTag=${eTag%\"}
-      #Calculate eTag on local file - no multipart required
-      filerETag=$(dd bs=1m count=1 if=$file 2>/dev/null | md5)
+      #Calculate eTag/md5 on local file - no multipart required
+      filerETag=$(openssl md5 $file | awk '{ print $2 }')
       #check file integrity MD5 eTag
-      if [ $eTag == $filerETag ]; then
+      if [ "$eTag" == "$filerETag" ]; then
         echo "$file was found in filer and it is identical in s3 (this includes eTag validation)"
       else
         echo "Check $file as its integrity might have been compromised"
