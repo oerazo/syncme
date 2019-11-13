@@ -35,7 +35,7 @@ for dep in "${deps[@]}"; do
     hash "$dep" 2>/dev/null || missing+=("$dep")
 done
 [[ "${#missing[@]}" -gt 0 ]] && die "missing deps: ${missing[*]}"
-hlpmsg="auth failed against AWS API, your credentials might have expired, if you are using a federeded identity endpoint try re-authing"
+hlpmsg="auth failed against AWS API, refresh your aws credentials and make sure they are valid"
 aws sts get-caller-identity &>/dev/null || die " (fail) unable to connect to AWS"
 hlpmsg=""
 echo -e " "
