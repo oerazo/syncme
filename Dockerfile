@@ -5,8 +5,6 @@ FROM alpine:latest as base
 RUN apk add --update --no-cache bash curl unzip openssh python3 openssl \
     && rm -rf /var/cache/apk/*
 
-#WORKDIR /usr/local/bin
-
 # latest awscli
 # hadolint ignore=DL3013
 RUN python3 -m ensurepip \
