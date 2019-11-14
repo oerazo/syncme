@@ -18,8 +18,11 @@ bucket=$2
 RANDOM=$$$(date +%s)
 success() {
     e=("ヽ(°〇°)ﾉ" "(°ロ°) !" "(^０^)ノ" "(⌒ω⌒)ﾉ" "(∩ᄑ_ᄑ)⊃━☆ﾟ*･｡*･:≡( ε:)" "╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ" "( ͡° ͜ʖ ͡°)" "ଘ(੭ˊᵕˋ)੭* ੈ✩‧₊˚")
-    printf '\nCOMPLETE   %s\n' "${e[$RANDOM%${#e[@]}]}"
+    printf '\n\e[34mFile Transfer Complete   %s\e[39m\n' "${e[$RANDOM%${#e[@]}]}"
     exit 0
+}
+warning() {
+  printf "\e[32mWarning: \e[39m $1 \n"
 }
 # Set default aws region
 [[ "$AWS_DEFAULT_REGION" == "" ]] && AWS_DEFAULT_REGION="$AWS_REGION"
@@ -52,7 +55,7 @@ do
     base=$(basename "${file}")
     #check if local file exits in s3
     inS3=$(aws s3 ls s3://$bucket/${path#/}/$base)
-    [ ! -z "$inS3" ] ||  echo "Warning, $file found in filer but not in s3, continuing"
+    [ ! -z "$inS3" ] ||  warning "$file found in filer but not in s3, continuing"
     # Perform some validations
     result=$(aws s3 sync $path s3://$bucket/${path#/} --exclude='*' --include=$base --output text)
     if [ -z "$result" ]; then
@@ -68,12 +71,12 @@ do
       if [ "$eTag" == "$filerETag" ]; then
         echo "$file was found in filer and it is identical in s3 (this includes eTag validation)"
       else
-        echo "Check $file as its integrity might have been compromised"
+        warning "Check $file as its integrity might have been compromised or a network failure has occurred"
       fi
 
     else
       if [ ! -z "$inS3" ]; then
-        echo "Warning - the content of file $file has changed, continuing"
+        warning "the content of file $file has changed, continuing"
       else
         echo $result
       fi
