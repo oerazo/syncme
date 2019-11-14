@@ -8,7 +8,10 @@ die() {
     exit 1
 }
 
+linebreak() { printf '%78s\n' " " | tr ' ' '-'; }
+
 trap 'exit 255' SIGINT
+
 #vars
 hlpmsg=""
 bucket=$2
@@ -18,7 +21,6 @@ success() {
     printf '\nCOMPLETE   %s\n' "${e[$RANDOM%${#e[@]}]}"
     exit 0
 }
-
 # Set default aws region
 [[ "$AWS_DEFAULT_REGION" == "" ]] && AWS_DEFAULT_REGION="$AWS_REGION"
 [[ "$AWS_DEFAULT_REGION" == "" ]] && AWS_DEFAULT_REGION="ap-southeast-2"
@@ -27,7 +29,9 @@ success() {
 [[ "$#" -lt 2 ]] && usage
 
 # dependency check
-echo -e "checking dependencies"
+echo; linebreak
+echo "checking dependencies"
+
 deps=(aws dd openssl)
 missing=()
 for dep in "${deps[@]}"; do
@@ -38,7 +42,7 @@ done
 hlpmsg="auth failed against AWS API, refresh your aws credentials and make sure they are valid"
 aws sts get-caller-identity &>/dev/null || die " (fail) unable to connect to AWS"
 hlpmsg=""
-echo -e " "
+echo; linebreak
 
 find $1 -type f -print0 | while IFS= read -r -d '' file
 do
@@ -48,7 +52,7 @@ do
     base=$(basename "${file}")
     #check if local file exits in s3
     inS3=$(aws s3 ls s3://$bucket/${path#/}/$base)
-    [ ! -z "$inS3" ] || echo "Warning, $file found in filer but not in s3, continuing"
+    [ ! -z "$inS3" ] ||  echo "Warning, $file found in filer but not in s3, continuing"
     # Perform some validations
     result=$(aws s3 sync $path s3://$bucket/${path#/} --exclude='*' --include=$base --output text)
     if [ -z "$result" ]; then
@@ -77,4 +81,5 @@ do
 
 done
 
+echo; linebreak
 success
