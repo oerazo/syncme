@@ -15,7 +15,7 @@ Make sure you are logged in to aws, your ~/.aws/credentials file should have val
 
 Syncme does a dependency check so you are aware of what you need to install if running locally and makes sure that there are valid aws credentials being used.
 
-# Running the script locally (MacOs)
+# Running Syncme locally (MacOs)
 
 
 There are two arguments needed for running this script: the location of the files you want to sync and the destination S3 bucket
@@ -24,7 +24,7 @@ There are two arguments needed for running this script: the location of the file
 ./bin/syncme /some/location bucketName
 ```
 
-# Running the script with docker
+# Running Syncme with docker
 
 If you dont want to deal with dependencies, I have provided a wrapper  that runs Syncme using a lightweight alpine docker image.
 Just make sure your host ~/.aws/credentials file has valid creds and run
